@@ -1,35 +1,35 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using LeaveManagementWeb.Data;
+using AutoMapper;
+using LeaveManagementWeb.Models;
 
 namespace LeaveManagementWeb.Controllers
 {
     public class LeaveTypesController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IMapper _mapper;
 
-        public LeaveTypesController(ApplicationDbContext context)
+        public LeaveTypesController(ApplicationDbContext context, IMapper mapper)
         {
             _context = context;
+            _mapper = mapper;
         }
 
         // GET: LeaveTypes
         public async Task<IActionResult> Index()
         {
-              return _context.LeaveTypes != null ? 
-                          View(await _context.LeaveTypes.ToListAsync()) :
-                          Problem("Entity set 'ApplicationDbContext.LeaveTypes'  is null.");
+            var leaveTypes = _mapper
+                .Map<List<LeaveTypeVm>>(await _context.LeaveTypes.ToListAsync());
+
+            return  View(leaveTypes);
         }
 
         // GET: LeaveTypes/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null || _context.LeaveTypes == null)
+            if (id == null)
             {
                 return NotFound();
             }
@@ -41,7 +41,8 @@ namespace LeaveManagementWeb.Controllers
                 return NotFound();
             }
 
-            return View(leaveType);
+            var vm = _mapper.Map<LeaveTypeVm>(leaveType);
+            return View(vm);
         }
 
         // GET: LeaveTypes/Create
@@ -55,21 +56,22 @@ namespace LeaveManagementWeb.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Name,DefaultDays,Id,DateCreated,DateModified")] LeaveType leaveType)
+        public async Task<IActionResult> Create(LeaveTypeVm leaveTypeVm)
         {
             if (ModelState.IsValid)
             {
+                var leaveType = _mapper.Map<LeaveType>(leaveTypeVm);
                 _context.Add(leaveType);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            return View(leaveType);
+            return View(leaveTypeVm);
         }
 
         // GET: LeaveTypes/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null || _context.LeaveTypes == null)
+            if (id == null)
             {
                 return NotFound();
             }
@@ -79,7 +81,9 @@ namespace LeaveManagementWeb.Controllers
             {
                 return NotFound();
             }
-            return View(leaveType);
+
+            var vm = _mapper.Map<LeaveTypeVm>(leaveType);
+            return View(vm);
         }
 
         // POST: LeaveTypes/Edit/5
@@ -87,7 +91,7 @@ namespace LeaveManagementWeb.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Name,DefaultDays,Id,DateCreated,DateModified")] LeaveType leaveType)
+        public async Task<IActionResult> Edit(int id, LeaveTypeVm leaveType)
         {
             if (id != leaveType.Id)
             {
@@ -98,7 +102,7 @@ namespace LeaveManagementWeb.Controllers
             {
                 try
                 {
-                    _context.Update(leaveType);
+                    _context.Update(_mapper.Map<LeaveType>(leaveType));
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
@@ -114,13 +118,14 @@ namespace LeaveManagementWeb.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
+            
             return View(leaveType);
         }
 
         // GET: LeaveTypes/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null || _context.LeaveTypes == null)
+            if (id == null)
             {
                 return NotFound();
             }
