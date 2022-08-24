@@ -34,7 +34,7 @@
             <td>
                 <a class="btn btn-secondary" asp-action="Edit" asp-route-id="@item.Id"><i class="fas fa-pencil-alt"></i></a> |
                 <a class="btn btn-primary" asp-action="Details" asp-route-id="@item.Id"><i class="fa-solid fa-circle-info"></i></a> |
-                <a class="btn btn-danger" href="javascript:;" data-id="@item.Id" class="deleteBtn"><i class="fa-solid fa-trash-can"></i></a>
+                <a class="btn btn-danger deleteBtn" href="javascript:;" data-id="@item.Id"><i class="fa-solid fa-trash-can"></i></a>
             </td>
         </tr>
     }
